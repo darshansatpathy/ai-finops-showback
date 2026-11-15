@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-finops-showback"
+version = "0.1.0"
+description = "FinOps for AI workloads: token and GPU cost attribution, shared-cost allocation that reconciles to the cent, budgets with forecast, anomaly detection and unit economics."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "Darshan Kumar Satpathy" }]
+keywords = ["finops", "llm", "ai-cost", "showback", "chargeback", "unit-economics", "token-cost", "gpu"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "License :: OSI Approved :: MIT License",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5", "mypy>=1.10", "pip-audit>=2.7", "pyyaml>=6.0"]
+
+[project.scripts]
+finops = "finops.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/finops"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["error::ResourceWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM", "RUF"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "B011", "E501"]
+"src/finops/rules.py" = ["E501"]
+"src/finops/render.py" = ["E501"]
+"src/finops/cli.py" = ["E501"]
+"src/finops/sample.py" = ["S311"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "src"
+packages = ["finops"]

@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint, types, tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Ruff lint
+        run: ruff check .
+      - name: Ruff format
+        run: ruff format --check .
+      - name: Mypy (strict)
+        run: mypy
+      - name: Tests with coverage
+        run: pytest --cov=finops --cov-report=term-missing --cov-fail-under=85
+
+  costs:
+    name: Policy rules and generated files
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: pip install -e .
+      - name: Policy rules (the date is fixed because the data is a fixed snapshot)
+        run: finops check --fail-on high --today 2026-11-15 --format markdown | tee check.md
+      - name: Publish summary
+        if: always()
+        run: cat check.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Reports and chargeback CSV are current
+        run: finops report --check
+      - name: Sample data is reproducible
+        run: finops sample --check
+
+  package:
+    name: Wheel installs and runs on its own
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: |
+          pip install build
+          python -m build --wheel
+      - name: Install the wheel into a clean environment and run it on a copy of the data
+        run: |
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install dist/*.whl
+          mkdir /tmp/data
+          cp -r config data /tmp/data/
+          cd "$(mktemp -d)"
+          /tmp/clean/bin/finops --version
+          /tmp/clean/bin/finops check --root /tmp/data --today 2026-11-15 --fail-on high
+          /tmp/clean/bin/finops anomalies --root /tmp/data || test $? -eq 1
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: pip install -e . pip-audit
+      - name: pip-audit
+        run: pip-audit --skip-editable

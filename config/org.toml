@@ -1,0 +1,104 @@
+# The example organisation: invented teams, apps and budgets.
+
+[policy]
+untagged_max_pct = "2"           # spend on apps without a cost centre, as % of direct spend
+budget_warn_pct = "80"
+min_gpu_utilisation_pct = "50"   # busy hours as % of provisioned hours
+max_data_lag_days = 3            # usage exports older than this are stale
+anomaly_window_days = 14
+anomaly_min_history = 7
+anomaly_threshold = "3.5"        # modified z-score
+anomaly_min_increase_usd = "25"  # ignore spikes that are statistically odd but cheap
+anomaly_recent_days = 7          # only anomalies this recent raise a finding
+
+[[team]]
+id = "support-eng"
+name = "Support Engineering"
+cost_center = "CC-1010"
+
+[[team]]
+id = "growth"
+name = "Growth"
+cost_center = "CC-2020"
+
+[[team]]
+id = "risk"
+name = "Risk"
+cost_center = "CC-3030"
+
+[[team]]
+id = "data-platform"
+name = "Data Platform"
+cost_center = "CC-4040"
+
+[[app]]
+id = "support-copilot"
+team = "support-eng"
+cost_center = "CC-1010"
+environment = "prod"
+outcome_name = "tickets resolved"
+target_cost_per_outcome = "0.05"
+
+[[app]]
+id = "doc-search"
+team = "data-platform"
+cost_center = "CC-4040"
+environment = "prod"
+outcome_name = "queries answered"
+target_cost_per_outcome = "0.03"
+
+[[app]]
+id = "marketing-gen"
+team = "growth"
+cost_center = "CC-2020"
+environment = "prod"
+outcome_name = "drafts approved"
+target_cost_per_outcome = "0.20"
+
+[[app]]
+id = "fraud-triage"
+team = "risk"
+cost_center = "CC-3030"
+environment = "prod"
+outcome_name = "cases triaged"
+target_cost_per_outcome = "0.01"
+
+[[app]]
+id = "eval-sandbox"
+team = "data-platform"
+cost_center = ""                 # untagged on purpose: a dev sandbox nobody tagged
+environment = "dev"
+
+[[budget]]
+team = "support-eng"
+monthly_usd = "10000"
+
+[[budget]]
+team = "growth"
+monthly_usd = "7500"
+
+[[budget]]
+team = "risk"
+monthly_usd = "4000"
+
+[[budget]]
+team = "data-platform"
+monthly_usd = "11000"
+
+[[shared]]
+id = "ai-gateway"
+name = "AI gateway and rate limiting"
+monthly_usd = "3000"
+driver = "requests"
+
+[[shared]]
+id = "observability"
+name = "Tracing and observability"
+monthly_usd = "1800"
+driver = "tokens"
+
+[[shared]]
+id = "eval-harness"
+name = "Shared evaluation harness"
+monthly_usd = "1200"
+driver = "even"

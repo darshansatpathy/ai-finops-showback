@@ -1,0 +1,37 @@
+# Illustrative prices for fictional models, in US dollars per million tokens.
+# They are not any vendor's price list. Write money as strings, never as floats.
+# A price applies from `effective_from` until a later record for the same model.
+
+[[model]]
+id = "frontier-large"
+effective_from = "2026-01-01"
+input_per_mtok = "3.00"
+output_per_mtok = "15.00"
+cached_input_per_mtok = "0.30"
+
+[[model]]
+id = "frontier-large"
+effective_from = "2026-11-01"       # a price cut part-way through the data
+input_per_mtok = "2.50"
+output_per_mtok = "12.50"
+cached_input_per_mtok = "0.25"
+
+[[model]]
+id = "frontier-small"
+effective_from = "2026-01-01"
+input_per_mtok = "0.25"
+output_per_mtok = "1.25"
+cached_input_per_mtok = "0.025"
+
+[[model]]
+id = "embed-small"
+effective_from = "2026-01-01"
+input_per_mtok = "0.02"
+output_per_mtok = "0"
+cached_input_per_mtok = "0.02"
+
+# GPU capacity is billed on provisioned hours, whether or not it is busy.
+[[gpu]]
+sku = "gpu-80gb"
+effective_from = "2026-01-01"
+hourly = "3.50"
